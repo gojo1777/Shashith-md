@@ -11,10 +11,10 @@ cmd(
       const text = `👋 *Hello ${(pushname as string) || "Friend"}! I'm alive!*
 
 *╔══════════════════╗*
-*║   NIMSARA  MD   ║*
+*║   SHASHITH   MD   ║*
 *╚══════════════════╝*
 
-| 🤖 *Bot:* NIMSARA MD
+| 🤖 *Bot:* SHASHITH  MD
 | 📦 *Version:* 1.0.0
 | ⚡ *Status:* Online ✅
 | 🧠 *Memory:* ${used}MB / ${total}MB
@@ -23,7 +23,7 @@ cmd(
 *මෙනුව ලබා ගැනීමට* *${PREFIX}menu* ලෙස ටයිප් කරන්න
 *Owner සම්බන්ධ වීමට* *${PREFIX}owner* ටයිප් කරන්න
 
-> © *POWERED BY NIMSARA MD* 🌟`;
+> © *POWERED BY SHASHITH  MD* 🌟`;
 
       const sock = conn as Record<string, (jid: string, content: unknown, opts?: unknown) => Promise<void>>;
       const ALIVE_IMG = process.env["ALIVE_IMG"];

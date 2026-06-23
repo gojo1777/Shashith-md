@@ -13,7 +13,7 @@ cmd(
       }
 
       const icons: Record<string, string> = { main: "🏠", group: "👥", tools: "🔧", utility: "📦", other: "⚙️" };
-      let menuText = `╔══════════════════╗\n║    NIMSARA  MD   ║\n╚══════════════════╝\n\n👋 *Hello ${(pushname as string) || "Friend"}!*\n📋 *Available Commands*\n\n`;
+      let menuText = `╔══════════════════╗\n║    SHASHITH   MD   ║\n╚══════════════════╝\n\n👋 *Hello ${(pushname as string) || "Friend"}!*\n📋 *Available Commands*\n\n`;
 
       for (const [cat, cmds] of Object.entries(categories)) {
         const icon = icons[cat] || "⚙️";
@@ -21,7 +21,7 @@ cmd(
         for (const c of cmds) menuText += `  ┣ *${PREFIX}${c}*\n`;
         menuText += "\n";
       }
-      menuText += `> © *POWERED BY NIMSARA MD* 🌟`;
+      menuText += `> © *POWERD BY SHASHITH MD* 🌟`;
 
       const sock = conn as Record<string, (jid: string, content: unknown, opts?: unknown) => Promise<void>>;
       const ALIVE_IMG = process.env["ALIVE_IMG"];

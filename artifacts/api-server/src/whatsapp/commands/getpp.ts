@@ -15,7 +15,7 @@ cmd(
 
       if (!input) {
         return (reply as (t: string) => Promise<void>)(
-          `🖼️ *GetPP — NIMSARA MD*\n\nPhone number denna!\nExample: \`getpp 947XXXXXXXX\`\n\n> *NIMSARA MD* 🌟`
+          `🖼️ *GetPP — SHASHITH  MD*\n\nPhone number denna!\nExample: \`getpp 947XXXXXXXX\`\n\n> *SHASHITH MD* 🌟`
         );
       }
 
@@ -40,7 +40,7 @@ cmd(
         from as string,
         {
           image: { url: ppUrl },
-          caption: `✅ *GETPP SUCCESS*\n\n👤 *Number:* +${cleanNumber}\n\n> *NIMSARA MD* 🌟`,
+          caption: `✅ *GETPP SUCCESS*\n\n👤 *Number:* +${cleanNumber}\n\n> *SHASHITH MD* 🌟`,
         },
         { quoted: msg as never }
       );

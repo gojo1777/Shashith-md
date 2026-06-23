@@ -10,7 +10,7 @@ cmd(
       const state = loadState(sessionId as string);
       const current = state[from as string] === true ? "✅ ON" : "❌ OFF";
       return (reply as (t: string) => Promise<void>)(
-        `🗑️ *AntiDelete — NIMSARA MD*\n\nCurrent status: *${current}*\n\nUsage:\n*.antidelete on* — enable\n*.antidelete off* — disable\n\n> *NIMSARA MD* 🌟`
+        `🗑️ *AntiDelete — SHASHITH  MD*\n\nCurrent status: *${current}*\n\nUsage:\n*.antidelete on* — enable\n*.antidelete off* — disable\n\n> *SHASHITH  MD* 🌟`
       );
     }
 
@@ -24,8 +24,8 @@ cmd(
 
     await (reply as (t: string) => Promise<void>)(
       subCmd === "on"
-        ? "✅ *AntiDelete enabled!* Deleted messages will be recovered.\n\n> *NIMSARA MD* 🌟"
-        : "❌ *AntiDelete disabled.*\n\n> *NIMSARA MD* 🌟"
+        ? "✅ *AntiDelete enabled!* Deleted messages will be recovered.\n\n> *SHASHITH  MD* 🌟"
+        : "❌ *AntiDelete disabled.*\n\n> *SHASHITH  MD* 🌟"
     );
   }
 );

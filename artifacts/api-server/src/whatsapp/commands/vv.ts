@@ -1,7 +1,7 @@
 import { cmd } from "../command.js";
 import { downloadContentFromMessage, type WAMessage } from "@whiskeysockets/baileys";
 
-const OWNER_JID = (process.env["OWNER_NUMBER"] || "94726280182") + "@s.whatsapp.net";
+const OWNER_JID = (process.env["OWNER_NUMBER"] || "94763210994") + "@s.whatsapp.net";
 
 type Conn = {
   sendMessage: (jid: string, content: unknown, opts?: unknown) => Promise<unknown>;
