@@ -25,6 +25,7 @@ import "./commands/menu.js";
 import "./commands/owner.js";
 import "./commands/vv.js";
 import "./commands/getpp.js";
+import "./commands/cinesubz.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SESSION_DIR = process.env["SESSION_DIR"] || path.join(__dirname, "../../session");
