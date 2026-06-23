@@ -178,7 +178,7 @@ export async function onDelete(
     if (!stored) continue;
 
     const sender = (key["participant"] as string) || from;
-    const caption = `🗑️ *AntiDelete — NIMSARA MD*\n\n👤 *Sender:* @${sender.replace("@s.whatsapp.net", "")}\n\n> Deleted message recovered by *NIMSARA MD* 🌟`;
+    const caption = `🗑️ *AntiDelete — SHASHITH  MD*\n\n👤 *Sender:* @${sender.replace("@s.whatsapp.net", "")}\n\n> Deleted message recovered by *SHASHITH  MD* 🌟`;
 
     const cleanMsg = stored["message"] as Record<string, unknown>;
     const type = Object.keys(cleanMsg)[0];

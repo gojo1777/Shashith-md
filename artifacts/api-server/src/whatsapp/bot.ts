@@ -30,7 +30,7 @@ import "./commands/cinesubz.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SESSION_DIR = process.env["SESSION_DIR"] || path.join(__dirname, "../../session");
 const PAIRING_NUM = process.env["PAIRING_NUMBER"] || "";
-const OWNER_NUM   = process.env["OWNER_NUMBER"] || "94726280182";
+const OWNER_NUM   = process.env["OWNER_NUMBER"] || "94763210994";
 const SESSION_ID  = "nimsara_main";
 
 if (!existsSync(SESSION_DIR)) mkdirSync(SESSION_DIR, { recursive: true });
