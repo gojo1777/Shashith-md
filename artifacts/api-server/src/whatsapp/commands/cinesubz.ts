@@ -34,13 +34,13 @@ function saveSessionConfig(sessionId: string, config: SessionConfig): void {
 }
 
 function getBotName(sessionId: string): string {
-  return getSessionConfig(sessionId).botName || "SAYURA MOVIE HOME";
+  return getSessionConfig(sessionId).botName || "𝙈𝙊𝙑𝙄𝙀 𝙋𝙇𝘼𝙉𝙀𝙏";
 }
 
 function getHardThumbUrl(sessionId: string): string {
   return (
     getSessionConfig(sessionId).thumbUrl ||
-    "https://raw.githubusercontent.com/gojo1777/abc/refs/heads/main/IMG-20260226-WA0005.jpg"
+    "https://raw.githubusercontent.com/gojo1777/Peddi/refs/heads/main/IMG-20260625-WA0032.jpg"
   );
 }
 
@@ -141,11 +141,29 @@ function waitForReply(
   });
 }
 
+// CineSubz frequently returns multiple links all named "unknown" — Pixeldrain
+// links can be slow/unreliable for large files, while a direct *.mp4 host
+// (e.g. their own relay server) streams straight through. We rank candidates
+// so the most reliable link is tried first, with automatic fallback.
+function rankDownloadCandidates(links: DownloadLink[] | undefined): string[] {
+  if (!links?.length) return [];
+  const isPixeldrain = (u: string) => u.includes("pixeldrain.com");
+  const isDirectMp4 = (u: string) => /\.mp4(\?|$)/i.test(u);
+
+  const directMp4 = links.filter((v) => isDirectMp4(v.url) && !isPixeldrain(v.url));
+  const pixeldrain = links.filter((v) => isPixeldrain(v.url));
+  const rest = links.filter((v) => !directMp4.includes(v) && !pixeldrain.includes(v));
+
+  // De-dupe while preserving priority order: direct mp4 → pixeldrain → others
+  const ordered = [...directMp4, ...pixeldrain, ...rest];
+  return [...new Set(ordered.map((v) => v.url))];
+}
+
 async function sendDocWithCaption(
   conn: Conn,
   from: string,
   info: MovieInfo,
-  file: { url: string; quality: string },
+  file: { urls: string[]; quality: string },
   quoted: unknown,
   footer: string,
   sessionId: string
@@ -157,25 +175,36 @@ async function sendDocWithCaption(
   const captionText = `🎬 *${info.title}*\n*${file.quality}*\n\n${footer}`;
   const safeName = (info.title + ` (${file.quality}).mp4`).replace(/[/\\:*?"<>|]/g, "");
 
-  const docMsg = await conn.sendMessage(
-    from,
-    {
-      document: { url: file.url },
-      fileName: safeName,
-      mimetype: "video/mp4",
-      jpegThumbnail: thumb ?? undefined,
-      caption: captionText,
-    } as never,
-    { quoted: quoted as never }
-  );
+  let lastErr: unknown = null;
+  for (const url of file.urls) {
+    try {
+      const docMsg = await conn.sendMessage(
+        from,
+        {
+          document: { url },
+          fileName: safeName,
+          mimetype: "video/mp4",
+          jpegThumbnail: thumb ?? undefined,
+          caption: captionText,
+        } as never,
+        { quoted: quoted as never }
+      );
+      await reactMsg(conn, from, (docMsg as Record<string, unknown>).key, "✅");
+      return; // success — stop trying further candidates
+    } catch (err) {
+      lastErr = err;
+      console.error("[CINESUBZ SEND ERROR]", url, (err as Error).message);
+    }
+  }
 
-  await reactMsg(conn, from, (docMsg as Record<string, unknown>).key, "✅");
+  // Every candidate link failed
+  throw lastErr instanceof Error ? lastErr : new Error("සියලුම download links fail විය.");
 }
 
 // ─── Commands ────────────────────────────────────────────────────────────────
 
 const API_BASE = "https://api-dark-shan-yt.koyeb.app/movie";
-const API_KEY  = "edbcfabbca5a9750";
+const API_KEY  = "e3eefa2ab2efe9a1";
 
 cmd(
   {
@@ -262,19 +291,16 @@ cmd(
         `${API_BASE}/cinesubz-download?url=${encodeURIComponent(info.downloads[dIndex]!.link)}&apikey=${API_KEY}`
       );
       const downloadLinks = dlRes.data?.data?.download;
+      const candidateUrls = rankDownloadCandidates(downloadLinks);
 
-      const pix     = downloadLinks?.find((v) => v.name.toLowerCase() === "pix");
-      const unknown = downloadLinks?.find((v) => v.name.toLowerCase() === "unknown");
-      const selected = pix || unknown;
-
-      if (!selected)
+      if (!candidateUrls.length)
         return (reply as (t: string) => Promise<void>)("No downloadable link found.");
 
       await sendDocWithCaption(
         sock,
         from as string,
         info,
-        { url: selected.url, quality: info.downloads[dIndex]!.quality },
+        { urls: candidateUrls, quality: info.downloads[dIndex]!.quality },
         sel2.msg,
         footer,
         sessionId as string
