@@ -43,6 +43,8 @@ let sock: ReturnType<typeof makeWASocket> | null = null;
 let isConnected = false;
 let reconnectTry = 0;
 let currentQrDataUrl: string | null = null;
+let socketReady = false; // true once the WS layer has connected (qr/open/close fired at least once)
+let pairingInFlight = false;
 
 export function getBotStatus() {
   return {
@@ -56,6 +58,51 @@ export function getBotQr() {
     qr: currentQrDataUrl,
     connected: isConnected,
   };
+}
+
+/**
+ * Request a WhatsApp pairing code for a given phone number on demand
+ * (e.g. triggered from an API call / dashboard input), as an alternative
+ * to scanning the QR code. Returns the pairing code string.
+ */
+export async function requestPairingCodeForNumber(rawNumber: string): Promise<string> {
+  if (!sock) {
+    throw new Error("Bot is still starting up. Try again in a few seconds.");
+  }
+  if (isConnected || sock.authState.creds.registered) {
+    throw new Error("WhatsApp is already linked. Restart/unlink first to re-pair.");
+  }
+  if (pairingInFlight) {
+    throw new Error("A pairing request is already in progress. Please wait.");
+  }
+
+  const number = rawNumber.replace(/[^0-9]/g, "");
+  if (!number || number.length < 7) {
+    throw new Error("Invalid phone number. Use full international format e.g. 9476xxxxxxx (no + or spaces).");
+  }
+
+  // Wait briefly for the socket to actually open its WS connection if it
+  // hasn't yet (covers the case where this is called right at startup).
+  let waited = 0;
+  while (!socketReady && waited < 8000) {
+    await new Promise((r) => setTimeout(r, 250));
+    waited += 250;
+  }
+
+  pairingInFlight = true;
+  try {
+    const code = await sock.requestPairingCode(number);
+    appLogger.info({ code, number }, "Pairing code requested via API");
+    console.log("\n============================");
+    console.log(`PAIRING CODE for ${number}: ${code}`);
+    console.log("============================\n");
+    return code;
+  } catch (err) {
+    appLogger.error({ err, number }, "Failed to generate pairing code");
+    throw new Error("Failed to generate pairing code. Make sure the number is correct and try again.");
+  } finally {
+    pairingInFlight = false;
+  }
 }
 
 const OWNER_JID = OWNER_NUM + "@s.whatsapp.net";
@@ -216,6 +263,10 @@ async function startBot() {
 
   sock.ev.on("connection.update", async (update) => {
     const { connection, lastDisconnect, qr } = update;
+
+    // WS layer has produced an update (qr / open / close) — safe to call
+    // requestPairingCode from here onwards.
+    socketReady = true;
 
     if (qr) {
       console.log("\n[NIMSARA MD] Scan this QR code with WhatsApp:");
