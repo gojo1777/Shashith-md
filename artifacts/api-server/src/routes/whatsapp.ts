@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { getBotStatus, getBotQr } from "../whatsapp/bot.js";
+import { getBotStatus, getBotQr, requestPairingCodeForNumber } from "../whatsapp/bot.js";
 
 const router: IRouter = Router();
 
@@ -32,6 +32,24 @@ router.get("/whatsapp/qr", (_req, res) => {
   res.setHeader("Content-Type", "image/png");
   res.setHeader("Cache-Control", "no-store");
   res.send(imageBuffer);
+});
+
+// Link device using a phone number instead of scanning the QR code.
+// POST body: { "number": "9476xxxxxxx" }  -> returns { "code": "ABCD-1234" }
+router.post("/whatsapp/pair", async (req, res) => {
+  const body = req.body as { number?: unknown };
+  const number = typeof body?.number === "string" ? body.number.trim() : "";
+
+  if (!number) {
+    return res.status(400).json({ error: "number is required (e.g. 9476xxxxxxx)" });
+  }
+
+  try {
+    const code = await requestPairingCodeForNumber(number);
+    res.json({ code });
+  } catch (err) {
+    res.status(400).json({ error: (err as Error).message });
+  }
 });
 
 export default router;
